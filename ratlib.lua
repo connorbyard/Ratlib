@@ -1,36 +1,4 @@
--- ####################################################################################################
--- ####################################################################################################
--- ####################################################################################################
--- ######## ######################################### ######################################## ########
--- ########## ############ #########################  ####################################### #########
--- ########### # ################################ ### ########## ########################### ##########
--- ############  ######### ########################## ########################## ##########  ##########
--- ### #########  ######## ################### #####   ##### # ################ ###### ### ####### ####
--- ##### #########   #####  ############# ######  #   # # ####### ### ########  ######    ### #  ######
--- ######       ##       ##    ############ ######### ######## ###### #######   #        ###  #########
--- ###########                 ## #### ######   ####  #####  ####### # ####                  # ########
--- ########## ###       ####     ####      ###               ######   ##    ########     ##############
--- ################   #######   #####      ##  ####     ##   # #####  ###    #######   ################
--- ################    #####    ## #   ##  ## #####   #####   ######  ####   #  #      # ##############
--- #############       ###    ######   ###  ########   ####   ######  ####             ################
--- ################         ########  ###      ####   ## ##   ######  ####  # #####     ###############
--- ###############     ##      #####     ##   ######  ####   #######  ####   ########    ##############
--- ################   #####    ####   #####    # ##   # ###  ##### #  ####   ########    ##############
--- ###############   ####### #   ##  #######   #####  # ###       #    ##     ### #   ### #############
--- ############## #    ########    #  #####     ###    ###       ##   #               #### ############
--- ############  ###    ######## #    ##### ####  ##  ### # ##### #  #   ## ###     ####### ###########
--- ############ ######   ############   ## ##### # #  # # ########   # #########   ####################
--- ########### ###### #  ###############  ##########   #########  #### # #######  #####################
--- ####################    ############# #  ##### # #    ##### ######### ######   #####################
--- ######################  ############# ### #######  # # ### ################  #######################
--- ########################  ######################## ####################### #########################
--- ################################################## ##################### ###########################
--- ############################# ######################################################################
--- ####################################################################################################
--- ####################################################################################################
-
 rat = {}
-
 
 -- MATHS
 function rat.maths_clamp(value, minimum_value, maximum_value)
@@ -176,12 +144,12 @@ local function ensure_scratch(width, height)
    scratch_image = graphics.new_image_from_pixelmap(scratch_pixelmap)
 end
 
-local function clear_scratch(width, height)
-   raster.blit_rect(scratch_pixelmap, 0, 0, width, height, TRANSPARENT, "replace")
+local function clear_scratch()
+   raster.blit_rect(scratch_pixelmap, 0, 0, scratch_width, scratch_height, TRANSPARENT, "replace")
 end
 
 local function draw_scratch(x, y, width, height)
-   graphics.update_image_region_from_pixelmap(scratch_image, scratch_pixelmap, 0, 0, width, height, 0, 0)
+   graphics.update_image_from_pixelmap(scratch_image, scratch_pixelmap)
    graphics.draw_image_region(scratch_image, 0, 0, width, height, x, y)
 end
 
@@ -214,7 +182,7 @@ function rat.shape_line(start_x, start_y, end_x, end_y, color)
    local height = maximum_y - minimum_y + 1
 
    ensure_scratch(width, height)
-   clear_scratch(width, height)
+   clear_scratch()
 
    raster.blit_line(
       scratch_pixelmap,
@@ -234,7 +202,7 @@ function rat.shape_rect(x, y, width, height, color)
    end
 
    ensure_scratch(width, height)
-   clear_scratch(width, height)
+   clear_scratch()
 
    raster.blit_line(scratch_pixelmap, 0, 0, width - 1, 0, color)
    raster.blit_line(scratch_pixelmap, width - 1, 0, width - 1, height - 1, color)
@@ -250,7 +218,7 @@ function rat.shape_rect_fill(x, y, width, height, color)
    end
 
    ensure_scratch(width, height)
-   clear_scratch(width, height)
+   clear_scratch()
 
    raster.blit_rect(scratch_pixelmap, 0, 0, width, height, color)
 
@@ -265,7 +233,7 @@ function rat.shape_circle(center_x, center_y, radius, color)
    local diameter = radius * 2 + 1
 
    ensure_scratch(diameter, diameter)
-   clear_scratch(diameter, diameter)
+   clear_scratch()
 
    raster.blit_circle_pixel_outline(scratch_pixelmap, radius, radius, radius, color)
 
@@ -280,7 +248,7 @@ function rat.shape_circle_fill(center_x, center_y, radius, color)
    local diameter = radius * 2 + 1
 
    ensure_scratch(diameter, diameter)
-   clear_scratch(diameter, diameter)
+   clear_scratch()
 
    raster.blit_circle(scratch_pixelmap, radius, radius, radius, color)
 
@@ -297,7 +265,7 @@ function rat.shape_triangle(point_a_x, point_a_y, point_b_x, point_b_y, point_c_
    local height = maximum_y - minimum_y + 1
 
    ensure_scratch(width, height)
-   clear_scratch(width, height)
+   clear_scratch()
 
    local point_a_local_x = point_a_x - minimum_x
    local point_a_local_y = point_a_y - minimum_y
@@ -323,7 +291,7 @@ function rat.shape_triangle_fill(point_a_x, point_a_y, point_b_x, point_b_y, poi
    local height = maximum_y - minimum_y + 1
 
    ensure_scratch(width, height)
-   clear_scratch(width, height)
+   clear_scratch()
 
    raster.blit_triangle(
       scratch_pixelmap,
@@ -349,7 +317,7 @@ function rat.shape_polygon(points, color)
    local height = maximum_y - minimum_y + 1
 
    ensure_scratch(width, height)
-   clear_scratch(width, height)
+   clear_scratch()
 
    for point_index = 1, #points do
       local next_point_index = point_index + 1
@@ -383,7 +351,7 @@ function rat.shape_polygon_fill(points, color)
    local height = maximum_y - minimum_y + 1
 
    ensure_scratch(width, height)
-   clear_scratch(width, height)
+   clear_scratch()
 
    local local_points = {}
 
