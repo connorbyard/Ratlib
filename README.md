@@ -57,4 +57,4 @@ end
 - `rat.camera` — 2D camera transforms
 ```
 
-See the generated LDoc documentation for the complete API.
+See [ratlib.cheatsheet](ratlib_cheatsheet.md) for a quick reference of the API.
