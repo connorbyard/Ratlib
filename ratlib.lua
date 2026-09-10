@@ -1,30 +1,64 @@
+--- Small procedural utility library for Newt.
+-- @module rat
 rat = {}
 
--- -------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- ---------------------------------------------------------------------------------------------------------------------
 -- MATHS
--- -------------------------------------------------------------------------------------------------------------------------------------------------------------
-function rat.maths_clamp(value, minimum_value, maximum_value)
+-- ---------------------------------------------------------------------------------------------------------------------
+
+--- Numeric helper functions.
+-- @table rat.maths
+rat.maths = {}
+--- Clamp a value between a minimum and maximum.
+-- @param value number: Value to clamp.
+-- @param minimum_value number: Minimum value.
+-- @param maximum_value number: Maximum value.
+-- @return number: Clamped value.
+function rat.maths.clamp(value, minimum_value, maximum_value)
    return math.max(minimum_value, math.min(value, maximum_value))
 end
 
-function rat.maths_lerp(start_value, end_value, interpolation_amount)
+--- Linearly interpolate between two values.
+-- @param start_value number: Starting value.
+-- @param end_value number: Ending value.
+-- @param interpolation_amount number: Interpolation amount, normally from 0 to 1.
+-- @return number: Interpolated value.
+function rat.maths.lerp(start_value, end_value, interpolation_amount)
    return start_value + (end_value - start_value) * interpolation_amount
 end
 
-function rat.maths_inverse_lerp(start_value, end_value, value)
+--- Return the interpolation amount of a value between two endpoints.
+-- @param start_value number: Starting value.
+-- @param end_value number: Ending value.
+-- @param value number: Value to measure.
+-- @return number: Interpolation amount.
+function rat.maths.inverse_lerp(start_value, end_value, value)
    return (value - start_value) / (end_value - start_value)
 end
 
-function rat.maths_remap(value, input_minimum, input_maximum, output_minimum, output_maximum)
-   local interpolation_amount = rat.maths_inverse_lerp(input_minimum, input_maximum, value)
-   return rat.maths_lerp(output_minimum, output_maximum, interpolation_amount)
+--- Remap a value from one numeric range to another.
+-- @param value number: Value to remap.
+-- @param input_minimum number: Input range minimum.
+-- @param input_maximum number: Input range maximum.
+-- @param output_minimum number: Output range minimum.
+-- @param output_maximum number: Output range maximum.
+-- @return number: Remapped value.
+function rat.maths.remap(value, input_minimum, input_maximum, output_minimum, output_maximum)
+   local interpolation_amount = rat.maths.inverse_lerp(input_minimum, input_maximum, value)
+   return rat.maths.lerp(output_minimum, output_maximum, interpolation_amount)
 end
 
-function rat.maths_round(value)
+--- Round a number to the nearest integer.
+-- @param value number: Value to round.
+-- @return number: Rounded value.
+function rat.maths.round(value)
    return math.floor(value + 0.5)
 end
 
-function rat.maths_sign(value)
+--- Return the sign of a number.
+-- @param value number: Value to inspect.
+-- @return number: -1, 0, or 1.
+function rat.maths.sign(value)
    if value < 0 then
       return -1
    elseif value > 0 then
@@ -34,18 +68,33 @@ function rat.maths_sign(value)
    return 0
 end
 
-function rat.maths_distance(point_a_x, point_a_y, point_b_x, point_b_y)
+--- Calculate Euclidean distance between two points.
+-- @param point_a_x number: First point x coordinate.
+-- @param point_a_y number: First point y coordinate.
+-- @param point_b_x number: Second point x coordinate.
+-- @param point_b_y number: Second point y coordinate.
+-- @return number: Distance between the points.
+function rat.maths.distance(point_a_x, point_a_y, point_b_x, point_b_y)
    local distance_x = point_b_x - point_a_x
    local distance_y = point_b_y - point_a_y
 
    return math.sqrt(distance_x * distance_x + distance_y * distance_y)
 end
 
-function rat.maths_snap(value, step_size)
-   return rat.maths_round(value / step_size) * step_size
+--- Snap a value to the nearest step.
+-- @param value number: Value to snap.
+-- @param step_size number: Snap interval.
+-- @return number: Snapped value.
+function rat.maths.snap(value, step_size)
+   return rat.maths.round(value / step_size) * step_size
 end
 
-function rat.maths_approach(current_value, target_value, step_size)
+--- Move a value toward a target without overshooting.
+-- @param current_value number: Current value.
+-- @param target_value number: Target value.
+-- @param step_size number: Maximum change.
+-- @return number: Updated value.
+function rat.maths.approach(current_value, target_value, step_size)
    if current_value < target_value then
       return math.min(current_value + step_size, target_value)
    elseif current_value > target_value then
@@ -55,18 +104,40 @@ function rat.maths_approach(current_value, target_value, step_size)
    return target_value
 end
 
--- -------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- ---------------------------------------------------------------------------------------------------------------------
 -- GEOMETRY
--- -------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- ---------------------------------------------------------------------------------------------------------------------
 
-function rat.geo_point_in_rect(point_x, point_y, rect_x, rect_y, rect_width, rect_height)
+--- Geometry helper functions.
+-- @table rat.geo
+rat.geo = {}
+
+--- Test whether a point lies inside a rectangle.
+-- @param point_x number: Point x coordinate.
+-- @param point_y number: Point y coordinate.
+-- @param rect_x number: Rectangle x coordinate.
+-- @param rect_y number: Rectangle y coordinate.
+-- @param rect_width number: Rectangle width.
+-- @param rect_height number: Rectangle height.
+-- @return boolean: True when the point lies inside the rectangle.
+function rat.geo.point_in_rect(point_x, point_y, rect_x, rect_y, rect_width, rect_height)
    return point_x >= rect_x
        and point_x <= rect_x + rect_width
        and point_y >= rect_y
        and point_y <= rect_y + rect_height
 end
 
-function rat.geo_rects_overlap(rect_a_x, rect_a_y, rect_a_width, rect_a_height, rect_b_x, rect_b_y, rect_b_width,
+--- Test whether two rectangles overlap.
+-- @param rect_a_x number: First rectangle x coordinate.
+-- @param rect_a_y number: First rectangle y coordinate.
+-- @param rect_a_width number: First rectangle width.
+-- @param rect_a_height number: First rectangle height.
+-- @param rect_b_x number: Second rectangle x coordinate.
+-- @param rect_b_y number: Second rectangle y coordinate.
+-- @param rect_b_width number: Second rectangle width.
+-- @param rect_b_height number: Second rectangle height.
+-- @return boolean: True when the rectangles overlap.
+function rat.geo.rects_overlap(rect_a_x, rect_a_y, rect_a_width, rect_a_height, rect_b_x, rect_b_y, rect_b_width,
                                rect_b_height)
    return rect_a_x < rect_b_x + rect_b_width
        and rect_a_x + rect_a_width > rect_b_x
@@ -74,10 +145,19 @@ function rat.geo_rects_overlap(rect_a_x, rect_a_y, rect_a_width, rect_a_height, 
        and rect_a_y + rect_a_height > rect_b_y
 end
 
--- -------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- ---------------------------------------------------------------------------------------------------------------------
 -- RESOLUTION
--- -------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- ---------------------------------------------------------------------------------------------------------------------
 
+--- Virtual-resolution state and helpers.
+-- @field width Virtual canvas width.
+-- @field height Virtual canvas height.
+-- @field scale Current window-to-virtual scale.
+-- @field offset_x Horizontal letterbox offset.
+-- @field offset_y Vertical letterbox offset.
+-- @field mouse_x Mouse x coordinate in virtual space.
+-- @field mouse_y Mouse y coordinate in virtual space.
+-- @table rat.res
 rat.res = {
    width = 1280,
    height = 720,
@@ -88,13 +168,17 @@ rat.res = {
    mouse_y = 0,
 }
 
-function rat.res_initialise(width, height)
+--- Initialise the virtual resolution.
+-- @param width number: Virtual width.
+-- @param height number: Virtual height.
+function rat.res.initialise(width, height)
    rat.res.width = width
    rat.res.height = height
-   rat.res_update()
+   rat.res.update()
 end
 
-function rat.res_update()
+--- Update virtual-resolution scale, letterbox offsets, and virtual mouse coordinates.
+function rat.res.update()
    local window_width, window_height = window.get_size()
 
    rat.res.scale = math.min(window_width / rat.res.width, window_height / rat.res.height)
@@ -111,29 +195,38 @@ function rat.res_update()
    rat.res.mouse_y = (mouse_y - rat.res.offset_y) / rat.res.scale
 end
 
-function rat.res_push()
+--- Begin drawing in virtual-resolution space.
+function rat.res.begin()
    graphics.begin_transform()
    graphics.set_translation(rat.res.offset_x, rat.res.offset_y)
    graphics.set_scale(rat.res.scale, rat.res.scale)
 end
 
-function rat.res_pop()
+--- Finish drawing in virtual-resolution space.
+function rat.res.finish()
    graphics.end_transform()
 end
 
--- -------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- ---------------------------------------------------------------------------------------------------------------------
 -- SHAPES
--- -------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- ---------------------------------------------------------------------------------------------------------------------
+--- Primitive shape drawing utilities.
+-- @table rat.shape
+-- @field dither_checkered 50% checkerboard dither pattern.
+-- @field dither_25 25% dither pattern.
+-- @field dither_75 75% dither pattern.
+rat.shape = {}
+
+rat.shape.dither_checkered = { { 1, 0 }, { 0, 1 } }
+rat.shape.dither_25 = { { 1, 0 }, { 0, 0 } }
+rat.shape.dither_75 = { { 1, 1 }, { 1, 0 } }
+
 local TRANSPARENT = rgba(0, 0, 0, 0)
 
 local scratch_pixelmap = nil
 local scratch_image = nil
 local scratch_width = 0
 local scratch_height = 0
-
-rat.dither_checkered = { { 1, 0 }, { 0, 1 } }
-rat.dither_25 = { { 1, 0 }, { 0, 0 } }
-rat.dither_75 = { { 1, 1 }, { 1, 0 } }
 
 local function ensure_scratch(width, height)
    if width <= scratch_width and height <= scratch_height then
@@ -143,13 +236,9 @@ local function ensure_scratch(width, height)
    local new_width = math.max(width, scratch_width)
    local new_height = math.max(height, scratch_height)
 
-   if scratch_image then
-      free(scratch_image)
-   end
+   if scratch_image then free(scratch_image) end
 
-   if scratch_pixelmap then
-      free(scratch_pixelmap)
-   end
+   if scratch_pixelmap then free(scratch_pixelmap) end
 
    scratch_width = new_width
    scratch_height = new_height
@@ -186,7 +275,13 @@ local function get_bounds(points)
    return minimum_x, minimum_y, maximum_x, maximum_y
 end
 
-function rat.shape_line(start_x, start_y, end_x, end_y, color)
+--- Draw a one-pixel line.
+-- @param start_x number: Start x coordinate.
+-- @param start_y number: Start y coordinate.
+-- @param end_x number: End x coordinate.
+-- @param end_y number: End y coordinate.
+-- @param color number: Packed RGBA colour.
+function rat.shape.line(start_x, start_y, end_x, end_y, color)
    local minimum_x = math.min(start_x, end_x)
    local minimum_y = math.min(start_y, end_y)
    local maximum_x = math.max(start_x, end_x)
@@ -198,19 +293,19 @@ function rat.shape_line(start_x, start_y, end_x, end_y, color)
    ensure_scratch(width, height)
    clear_scratch()
 
-   raster.blit_line(
-      scratch_pixelmap,
-      start_x - minimum_x,
-      start_y - minimum_y,
-      end_x - minimum_x,
-      end_y - minimum_y,
-      color
-   )
+   raster.blit_line(scratch_pixelmap, start_x - minimum_x, start_y - minimum_y, end_x - minimum_x, end_y - minimum_y,
+      color)
 
    draw_scratch(minimum_x, minimum_y, width, height)
 end
 
-function rat.shape_rect(x, y, width, height, color)
+--- Draw a one-pixel rectangle outline.
+-- @param x number: Left coordinate.
+-- @param y number: Top coordinate.
+-- @param width number: Width.
+-- @param height number: Height.
+-- @param color number: Packed RGBA colour.
+function rat.shape.rect(x, y, width, height, color)
    if width <= 0 or height <= 0 then
       return
    end
@@ -226,7 +321,13 @@ function rat.shape_rect(x, y, width, height, color)
    draw_scratch(x, y, width, height)
 end
 
-function rat.shape_rect_fill(x, y, width, height, color)
+--- Draw a filled rectangle.
+-- @param x number: Left coordinate.
+-- @param y number: Top coordinate.
+-- @param width number: Width.
+-- @param height number: Height.
+-- @param color number: Packed RGBA colour.
+function rat.shape.rect_fill(x, y, width, height, color)
    if width <= 0 or height <= 0 then
       return
    end
@@ -239,7 +340,15 @@ function rat.shape_rect_fill(x, y, width, height, color)
    draw_scratch(x, y, width, height)
 end
 
-function rat.shape_rect_dither(x, y, width, height, color_1, color_2, pattern)
+--- Draw a dithered rectangle using two colours and a repeating pattern.
+-- @param x number: Left coordinate.
+-- @param y number: Top coordinate.
+-- @param width number: Width.
+-- @param height number: Height.
+-- @param color_1 number: First packed RGBA colour.
+-- @param color_2 number: Second packed RGBA colour.
+-- @param pattern table: Two-dimensional dither pattern.
+function rat.shape.rect_dither(x, y, width, height, color_1, color_2, pattern)
    if width <= 0 or height <= 0 then
       return
    end
@@ -265,7 +374,12 @@ function rat.shape_rect_dither(x, y, width, height, color_1, color_2, pattern)
    draw_scratch(x, y, width, height)
 end
 
-function rat.shape_circle(center_x, center_y, radius, color)
+--- Draw a one-pixel circle outline.
+-- @param center_x number: Centre x coordinate.
+-- @param center_y number: Centre y coordinate.
+-- @param radius number: Radius in pixels.
+-- @param color number: Packed RGBA colour.
+function rat.shape.circle(center_x, center_y, radius, color)
    if radius < 0 then
       return
    end
@@ -280,7 +394,12 @@ function rat.shape_circle(center_x, center_y, radius, color)
    draw_scratch(center_x - radius, center_y - radius, diameter, diameter)
 end
 
-function rat.shape_circle_fill(center_x, center_y, radius, color)
+--- Draw a filled circle.
+-- @param center_x number: Centre x coordinate.
+-- @param center_y number: Centre y coordinate.
+-- @param radius number: Radius in pixels.
+-- @param color number: Packed RGBA colour.
+function rat.shape.circle_fill(center_x, center_y, radius, color)
    if radius < 0 then
       return
    end
@@ -295,7 +414,15 @@ function rat.shape_circle_fill(center_x, center_y, radius, color)
    draw_scratch(center_x - radius, center_y - radius, diameter, diameter)
 end
 
-function rat.shape_triangle(point_a_x, point_a_y, point_b_x, point_b_y, point_c_x, point_c_y, color)
+--- Draw a triangle outline.
+-- @param point_a_x number: First point x coordinate.
+-- @param point_a_y number: First point y coordinate.
+-- @param point_b_x number: Second point x coordinate.
+-- @param point_b_y number: Second point y coordinate.
+-- @param point_c_x number: Third point x coordinate.
+-- @param point_c_y number: Third point y coordinate.
+-- @param color number: Packed RGBA colour.
+function rat.shape.triangle(point_a_x, point_a_y, point_b_x, point_b_y, point_c_x, point_c_y, color)
    local minimum_x = math.min(point_a_x, point_b_x, point_c_x)
    local minimum_y = math.min(point_a_y, point_b_y, point_c_y)
    local maximum_x = math.max(point_a_x, point_b_x, point_c_x)
@@ -321,7 +448,15 @@ function rat.shape_triangle(point_a_x, point_a_y, point_b_x, point_b_y, point_c_
    draw_scratch(minimum_x, minimum_y, width, height)
 end
 
-function rat.shape_triangle_fill(point_a_x, point_a_y, point_b_x, point_b_y, point_c_x, point_c_y, color)
+--- Draw a filled triangle.
+-- @param point_a_x number: First point x coordinate.
+-- @param point_a_y number: First point y coordinate.
+-- @param point_b_x number: Second point x coordinate.
+-- @param point_b_y number: Second point y coordinate.
+-- @param point_c_x number: Third point x coordinate.
+-- @param point_c_y number: Third point y coordinate.
+-- @param color number: Packed RGBA colour.
+function rat.shape.triangle_fill(point_a_x, point_a_y, point_b_x, point_b_y, point_c_x, point_c_y, color)
    local minimum_x = math.min(point_a_x, point_b_x, point_c_x)
    local minimum_y = math.min(point_a_y, point_b_y, point_c_y)
    local maximum_x = math.max(point_a_x, point_b_x, point_c_x)
@@ -333,21 +468,16 @@ function rat.shape_triangle_fill(point_a_x, point_a_y, point_b_x, point_b_y, poi
    ensure_scratch(width, height)
    clear_scratch()
 
-   raster.blit_triangle(
-      scratch_pixelmap,
-      point_a_x - minimum_x,
-      point_a_y - minimum_y,
-      point_b_x - minimum_x,
-      point_b_y - minimum_y,
-      point_c_x - minimum_x,
-      point_c_y - minimum_y,
-      color
-   )
+   raster.blit_triangle(scratch_pixelmap, point_a_x - minimum_x, point_a_y - minimum_y,
+      point_b_x - minimum_x, point_b_y - minimum_y, point_c_x - minimum_x, point_c_y - minimum_y, color)
 
    draw_scratch(minimum_x, minimum_y, width, height)
 end
 
-function rat.shape_polygon(points, color)
+--- Draw a closed polygon outline.
+-- @param points table: Array of {x, y} points.
+-- @param color number: Packed RGBA colour.
+function rat.shape.polygon(points, color)
    if #points < 2 then
       return
    end
@@ -381,7 +511,10 @@ function rat.shape_polygon(points, color)
    draw_scratch(minimum_x, minimum_y, width, height)
 end
 
-function rat.shape_polygon_fill(points, color)
+--- Draw a filled polygon.
+-- @param points table: Array of {x, y} points.
+-- @param color number: Packed RGBA colour.
+function rat.shape.polygon_fill(points, color)
    if #points < 3 then
       return
    end
@@ -441,8 +574,18 @@ function rat.shape_polygon_fill(points, color)
    draw_scratch(minimum_x, minimum_y, width, height)
 end
 
+-- ---------------------------------------------------------------------------------------------------------------------
 -- TWEENS
-function rat.tween_new(duration_seconds)
+-- ---------------------------------------------------------------------------------------------------------------------
+
+--- Tween state, easing, and motion helpers.
+-- @table rat.tween
+rat.tween = {}
+
+--- Create tween state.
+-- @param duration_seconds number: Tween duration in seconds.
+-- @return table: New tween state.
+function rat.tween.new(duration_seconds)
    return {
       duration = duration_seconds,
       elapsed = 0,
@@ -450,7 +593,10 @@ function rat.tween_new(duration_seconds)
    }
 end
 
-function rat.tween_update(tween_state, delta_time)
+--- Advance tween state.
+-- @param tween_state table: Tween state.
+-- @param delta_time number: Elapsed time in seconds.
+function rat.tween.update(tween_state, delta_time)
    if tween_state.finished then
       return
    end
@@ -463,68 +609,112 @@ function rat.tween_update(tween_state, delta_time)
    end
 end
 
-function rat.tween_reset(tween_state)
+--- Reset tween state to its beginning.
+-- @param tween_state table: Tween state.
+function rat.tween.reset(tween_state)
    tween_state.elapsed = 0
    tween_state.finished = false
 end
 
-function rat.tween_time(tween_state)
+--- Return normalised tween time.
+-- @param tween_state table: Tween state.
+-- @return number: Normalised time from 0 to 1.
+function rat.tween.time(tween_state)
    return math.max(0, math.min(tween_state.elapsed / tween_state.duration, 1))
 end
 
 -- TWEEN EASING
-function rat.tween_linear(time)
+--- Apply linear easing.
+-- @param time number: Normalised time from 0 to 1.
+-- @return number: Eased value.
+function rat.tween.linear(time)
    return time
 end
 
-function rat.tween_sine_in(time)
+--- Apply sine-in easing.
+-- @param time number: Normalised time from 0 to 1.
+-- @return number: Eased value.
+function rat.tween.sine_in(time)
    return 1 - math.cos((time * math.pi) / 2)
 end
 
-function rat.tween_sine_out(time)
+--- Apply sine-out easing.
+-- @param time number: Normalised time from 0 to 1.
+-- @return number: Eased value.
+function rat.tween.sine_out(time)
    return math.sin((time * math.pi) / 2)
 end
 
-function rat.tween_sine_in_out(time)
+--- Apply sine-in-out easing.
+-- @param time number: Normalised time from 0 to 1.
+-- @return number: Eased value.
+function rat.tween.sine_in_out(time)
    return -(math.cos(math.pi * time) - 1) / 2
 end
 
 -- TWEEN MOTION
-function rat.tween_hop(maximum_height, time)
+--- Return a parabolic hop offset.
+-- @param maximum_height number: Maximum hop height.
+-- @param time number: Normalised time from 0 to 1.
+-- @return number: Hop offset.
+function rat.tween.hop(maximum_height, time)
    return 4 * maximum_height * time * (1 - time)
 end
 
-function rat.tween_bump(maximum_distance, time)
+--- Return an out-and-back sine offset.
+-- @param maximum_distance number: Maximum distance.
+-- @param time number: Normalised time from 0 to 1.
+-- @return number: Bump offset.
+function rat.tween.bump(maximum_distance, time)
    if time <= 0.5 then
-      return maximum_distance * rat.tween_sine_out(time * 2)
+      return maximum_distance * rat.tween.sine_out(time * 2)
    end
 
-   return maximum_distance * rat.tween_sine_in((1 - time) * 2)
+   return maximum_distance * rat.tween.sine_in((1 - time) * 2)
 end
 
-function rat.tween_pulse(minimum_value, maximum_value, time)
+--- Pulse between a minimum and maximum value.
+-- @param minimum_value number: Minimum value.
+-- @param maximum_value number: Maximum value.
+-- @param time number: Normalised time from 0 to 1.
+-- @return number: Pulsed value.
+function rat.tween.pulse(minimum_value, maximum_value, time)
    local value_range = maximum_value - minimum_value
 
    if time <= 0.5 then
-      return minimum_value + value_range * rat.tween_sine_out(time * 2)
+      return minimum_value + value_range * rat.tween.sine_out(time * 2)
    end
 
-   return minimum_value + value_range * rat.tween_sine_in((1 - time) * 2)
+   return minimum_value + value_range * rat.tween.sine_in((1 - time) * 2)
 end
 
--- -------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- ---------------------------------------------------------------------------------------------------------------------
 -- SPRITES
--- -------------------------------------------------------------------------------------------------------------------------------------------------------------
-function rat.sprite_load_atlas(path, sprite_width, sprite_height)
-   local image, err = graphics.load_image(path)
+-- ---------------------------------------------------------------------------------------------------------------------
 
-   if not image then
-      error("Failed to load sprite atlas '" .. path .. "': " .. tostring(err))
+--- Sprite-atlas loading, drawing, animation, and palette replacement.
+-- @field atlas Active sprite atlas, or nil when none is set.
+-- @table rat.sprite
+rat.sprite = {
+   atlas = nil,
+}
+
+--- Load a sprite atlas and retain both its CPU pixelmap and GPU image.
+-- @param path string: Image path.
+-- @param sprite_width number: Sprite width in pixels.
+-- @param sprite_height number: Sprite height in pixels.
+-- @return table: Loaded sprite atlas.
+function rat.sprite.load_sprite_atlas(path, sprite_width, sprite_height)
+   local pixelmap, image_width, image_height = raster.load_pixelmap(path)
+
+   if not pixelmap then
+      error("Failed to load sprite atlas '" .. path .. "'")
    end
 
-   local image_width, image_height = graphics.get_image_size(image)
+   local image = graphics.new_image_from_pixelmap(pixelmap)
 
    return {
+      pixelmap = pixelmap,
       image = image,
       sprite_width = sprite_width,
       sprite_height = sprite_height,
@@ -533,41 +723,111 @@ function rat.sprite_load_atlas(path, sprite_width, sprite_height)
    }
 end
 
-function rat.sprite_draw(atlas, index, gx, gy)
-   local zero_index = index - 1
+--- Set the active sprite atlas.
+-- @param atlas table|nil: Atlas to use, or nil to clear it.
+function rat.sprite.set_sprite_atlas(atlas)
+   rat.sprite.atlas = atlas
+end
 
-   local atlas_x = zero_index % atlas.columns
-   local atlas_y = math.floor(zero_index / atlas.columns)
+--- Draw a sprite from the active atlas.
+-- @param index number: Zero-based sprite index.
+-- @param x number: Destination x coordinate in pixels.
+-- @param y number: Destination y coordinate in pixels.
+-- @param flip_x boolean|nil: Flip horizontally when true.
+-- @param flip_y boolean|nil: Flip vertically when true.
+-- @param colour number|nil: Optional packed RGBA modulation colour.
+function rat.sprite.draw_sprite(index, x, y, flip_x, flip_y, colour)
+   local atlas = rat.sprite.atlas
 
+   if not atlas then
+      error("No sprite atlas set")
+   end
+
+   local atlas_x = index % atlas.columns
+   local atlas_y = math.floor(index / atlas.columns)
    local source_x = atlas_x * atlas.sprite_width
    local source_y = atlas_y * atlas.sprite_height
 
-   local draw_x = gx * atlas.sprite_width
-   local draw_y = gy * atlas.sprite_height
+   colour = colour or 0xFFFFFFFF
 
-   graphics.draw_image_region(
-      atlas.image,
-      source_x,
-      source_y,
-      atlas.sprite_width,
-      atlas.sprite_height,
-      draw_x,
-      draw_y
-   )
+   if flip_x or flip_y then
+      local centre_x = x + atlas.sprite_width / 2
+      local centre_y = y + atlas.sprite_height / 2
+
+      graphics.begin_transform()
+      graphics.set_translation(centre_x, centre_y)
+      graphics.set_scale(flip_x and -1 or 1, flip_y and -1 or 1)
+      graphics.set_origin(centre_x, centre_y)
+   end
+
+   graphics.draw_image_region(atlas.image, source_x, source_y, atlas.sprite_width, atlas.sprite_height, x, y, colour)
+
+   if flip_x or flip_y then
+      graphics.end_transform()
+   end
 end
 
-function rat.sprite_animate_frames(atlas, first_index, last_index, fps, gx, gy)
+--- Draw a frame from a contiguous sprite animation.
+-- @param first_index number: First zero-based sprite index.
+-- @param last_index number: Last zero-based sprite index.
+-- @param fps number: Animation speed in frames per second.
+-- @param x number: Destination x coordinate.
+-- @param y number: Destination y coordinate.
+-- @param flip_x boolean|nil: Flip horizontally when true.
+-- @param flip_y boolean|nil: Flip vertically when true.
+-- @param colour number|nil: Optional packed RGBA modulation colour.
+function rat.sprite.animate_sprites(first_index, last_index, fps, x, y, flip_x, flip_y, colour)
    local frame_count = last_index - first_index + 1
    local frame = math.floor(os.clock() * fps) % frame_count
    local index = first_index + frame
 
-   rat.sprite_draw(atlas, index, gx, gy)
+   rat.sprite.draw_sprite(index, x, y, flip_x, flip_y, colour)
 end
 
--- -------------------------------------------------------------------------------------------------------------------------------------------------------------
--- IMGUI
--- -------------------------------------------------------------------------------------------------------------------------------------------------------------
+--- Replace every exact occurrence of one colour in the active sprite atlas.
+-- @param from_colour number: Packed RGBA colour to replace.
+-- @param to_colour number: Replacement packed RGBA colour.
+function rat.sprite.swap_colour(from_colour, to_colour)
+   local atlas = rat.sprite.atlas
 
+   if not atlas then
+      error("No sprite atlas set")
+   end
+
+   local width, height = raster.get_pixelmap_size(atlas.pixelmap)
+
+   for y = 0, height - 1 do
+      for x = 0, width - 1 do
+         if raster.get_pixel(atlas.pixelmap, x, y) == from_colour then
+            raster.set_pixel(atlas.pixelmap, x, y, to_colour)
+         end
+      end
+   end
+
+   graphics.update_image_from_pixelmap(atlas.image, atlas.pixelmap)
+end
+
+-- ---------------------------------------------------------------------------------------------------------------------
+-- GUI
+-- ---------------------------------------------------------------------------------------------------------------------
+
+--- Immediate-mode GUI state and widgets.
+-- @field hot_id Widget currently under the mouse.
+-- @field active_id Widget currently active.
+-- @field mouse_x Mouse x coordinate in GUI space.
+-- @field mouse_y Mouse y coordinate in GUI space.
+-- @field mouse_pressed True on the frame mouse button 1 is pressed.
+-- @field mouse_released True on the frame mouse button 1 is released.
+-- @field color_outline GUI outline colour.
+-- @field color_panel Default panel colour.
+-- @field color_cold Default idle widget colour.
+-- @field color_hot Default hovered widget colour.
+-- @field color_image_cold Idle image-button overlay colour.
+-- @field color_image_hot Hovered image-button overlay colour.
+-- @field color_active Active widget colour.
+-- @field color_text Default text colour.
+-- @field text_padding Text padding in pixels.
+-- @table rat.gui
 rat.gui = {
    hot_id = 0,
    active_id = 0,
@@ -608,7 +868,9 @@ local function gui_mouse_in_bounds(x, y, width, height)
        and rat.gui.mouse_y < y + height
 end
 
-function rat.gui_init(dt)
+--- Begin a GUI frame and update input state.
+-- @param dt number|nil: Frame delta time in seconds.
+function rat.gui.init(dt)
    rat.gui.hot_id = 0
    rat.gui.mouse_x = rat.res.mouse_x
    rat.gui.mouse_y = rat.res.mouse_y
@@ -623,7 +885,13 @@ function rat.gui_init(dt)
    end
 end
 
-function rat.gui_panel(x, y, width, height, color)
+--- Draw a GUI panel.
+-- @param x number: Left coordinate.
+-- @param y number: Top coordinate.
+-- @param width number: Width.
+-- @param height number: Height.
+-- @param color number|nil: Optional panel colour.
+function rat.gui.panel(x, y, width, height, color)
    color = color or rat.gui.color_panel
 
    graphics.draw_rect(x, y, width, height, rat.gui.color_outline)
@@ -633,7 +901,13 @@ function rat.gui_panel(x, y, width, height, color)
    end
 end
 
-function rat.gui_centered_text(text, x, y, width, height)
+--- Draw text centred inside a rectangle.
+-- @param text string: Text to draw.
+-- @param x number: Left coordinate.
+-- @param y number: Top coordinate.
+-- @param width number: Width.
+-- @param height number: Height.
+function rat.gui.centered_text(text, x, y, width, height)
    local _, text_height = graphics.measure_text_wrap(text, width)
    local text_y = math.floor(y + (height - text_height) / 2)
 
@@ -642,7 +916,14 @@ function rat.gui_centered_text(text, x, y, width, height)
    graphics.set_text_alignment("left")
 end
 
-function rat.gui_button(id, x, y, width, height)
+--- Update and draw a button.
+-- @param id number: Explicit non-zero widget id.
+-- @param x number: Left coordinate.
+-- @param y number: Top coordinate.
+-- @param width number: Width.
+-- @param height number: Height.
+-- @return boolean: True when pressed.
+function rat.gui.button(id, x, y, width, height)
    gui_require_id(id)
 
    local pressed = false
@@ -675,21 +956,37 @@ function rat.gui_button(id, x, y, width, height)
       color = rat.gui.color_hot
    end
 
-   rat.gui_panel(x, y, width, height, color)
+   rat.gui.panel(x, y, width, height, color)
 
    return pressed
 end
 
-function rat.gui_text_button(id, text, x, y, width, height)
-   local pressed = rat.gui_button(id, x, y, width, height)
+--- Update and draw a text button.
+-- @param id number: Explicit non-zero widget id.
+-- @param text string: Button label.
+-- @param x number: Left coordinate.
+-- @param y number: Top coordinate.
+-- @param width number: Width.
+-- @param height number: Height.
+-- @return boolean: True when pressed.
+function rat.gui.text_button(id, text, x, y, width, height)
+   local pressed = rat.gui.button(id, x, y, width, height)
 
-   rat.gui_centered_text(text, x, y, width, height)
+   rat.gui.centered_text(text, x, y, width, height)
 
    return pressed
 end
 
-function rat.gui_image_button(id, image, x, y, width, height)
-   local pressed = rat.gui_button(id, x, y, width, height)
+--- Update and draw an image button.
+-- @param id number: Explicit non-zero widget id.
+-- @param image userdata: Newt image.
+-- @param x number: Left coordinate.
+-- @param y number: Top coordinate.
+-- @param width number: Width.
+-- @param height number: Height.
+-- @return boolean: True when pressed.
+function rat.gui.image_button(id, image, x, y, width, height)
+   local pressed = rat.gui.button(id, x, y, width, height)
    local image_width, image_height = graphics.get_image_size(image)
    local scale = math.min(width / image_width, height / image_height)
 
@@ -715,7 +1012,13 @@ function rat.gui_image_button(id, image, x, y, width, height)
    return pressed
 end
 
-function rat.gui_text_box(text, x, y, width, height)
+--- Draw wrapped text inside a GUI panel.
+-- @param text string: Text to draw.
+-- @param x number: Left coordinate.
+-- @param y number: Top coordinate.
+-- @param width number: Width.
+-- @param height number: Height.
+function rat.gui.text_box(text, x, y, width, height)
    local padding = rat.gui.text_padding
    local draw_x = x + padding
    local draw_y = y + padding
@@ -723,7 +1026,7 @@ function rat.gui_text_box(text, x, y, width, height)
    local bottom = y + height - padding
    local line_height = graphics.get_font_line_skip()
 
-   rat.gui_panel(x, y, width, height)
+   rat.gui.panel(x, y, width, height)
 
    for character_index = 1, #text do
       local character = text:sub(character_index, character_index)
@@ -748,7 +1051,15 @@ function rat.gui_text_box(text, x, y, width, height)
    end
 end
 
-function rat.gui_text_field(id, x, y, width, height, text)
+--- Update and draw a single-line text field.
+-- @param id number: Explicit non-zero widget id.
+-- @param x number: Left coordinate.
+-- @param y number: Top coordinate.
+-- @param width number: Width.
+-- @param height number: Height.
+-- @param text string: Current text value.
+-- @return string: Updated text value.
+function rat.gui.text_field(id, x, y, width, height, text)
    gui_require_id(id)
 
    if type(text) ~= "string" then
@@ -850,7 +1161,7 @@ function rat.gui_text_field(id, x, y, width, height, text)
       color = rat.gui.color_hot
    end
 
-   rat.gui_panel(x, y, width, height, color)
+   rat.gui.panel(x, y, width, height, color)
 
    local padding = rat.gui.text_padding
    local inner_width = width - padding * 2
@@ -915,9 +1226,12 @@ function rat.gui_text_field(id, x, y, width, height, text)
    return text
 end
 
--- -------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- ---------------------------------------------------------------------------------------------------------------------
 -- DATA
--- -------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- ---------------------------------------------------------------------------------------------------------------------
+--- Plain Lua data serialisation helpers.
+-- @table rat.data
+rat.data = {}
 
 local lua_keywords = {
    ["and"] = true,
@@ -1014,8 +1328,8 @@ local function data_serialize_value(value, active_tables, indentation)
             serialized_key = "[" .. data_serialize_value(key, active_tables, next_indentation) .. "]"
          end
 
-         entries[#entries + 1] = next_indentation .. serialized_key .. " = "
-             .. data_serialize_value(entry_value, active_tables, next_indentation)
+         entries[#entries + 1] = next_indentation ..
+             serialized_key .. " = " .. data_serialize_value(entry_value, active_tables, next_indentation)
       end
    end
 
@@ -1060,12 +1374,19 @@ local function data_validate(value, active_tables)
    active_tables[value] = nil
 end
 
-function rat.data_save(path, data)
+--- Serialise plain Lua data and write it to disk.
+-- @param path string: Destination path.
+-- @param data any: Serializable Lua value.
+-- @return any: Result returned by filesystem.write_file.
+function rat.data.save(path, data)
    local serialized_data = "return " .. data_serialize_value(data, {}, "") .. "\n"
    return filesystem.write_file(path, serialized_data)
 end
 
-function rat.data_load(path)
+--- Load and validate plain Lua data from disk.
+-- @param path string: Source path.
+-- @return any: Loaded value, or nil followed by an error message.
+function rat.data.load(path)
    local serialized_data, read_error = filesystem.read_file(path)
 
    if not serialized_data then
@@ -1093,6 +1414,134 @@ function rat.data_load(path)
    end
 
    return data
+end
+
+-- ---------------------------------------------------------------------------------------------------------------------
+-- CAMERA
+-- ---------------------------------------------------------------------------------------------------------------------
+
+--- Simple world-space camera transforms.
+-- @table rat.camera
+rat.camera = {}
+
+local function clamp_camera_to_bounds(camera)
+   if camera.min_x == nil then
+      return
+   end
+
+   camera.x = rat.maths.clamp(camera.x, camera.min_x, camera.max_x)
+   camera.y = rat.maths.clamp(camera.y, camera.min_y, camera.max_y)
+end
+
+--- Create camera state.
+-- @param x number|nil: Initial world x coordinate.
+-- @param y number|nil: Initial world y coordinate.
+-- @param zoom number|nil: Initial zoom.
+-- @return table: New camera state.
+function rat.camera.new_camera(x, y, zoom)
+   return {
+      x = x or 0,
+      y = y or 0,
+      zoom = zoom or 1,
+      min_x = nil,
+      min_y = nil,
+      max_x = nil,
+      max_y = nil,
+   }
+end
+
+--- Begin drawing through a camera transform.
+-- @param camera table: Camera state.
+function rat.camera.start_camera(camera)
+   graphics.begin_transform()
+   graphics.set_translation(-camera.x * camera.zoom, -camera.y * camera.zoom)
+   graphics.set_scale(camera.zoom, camera.zoom)
+end
+
+--- End the current camera transform.
+function rat.camera.stop_camera()
+   graphics.end_transform()
+end
+
+--- Move a camera by an offset.
+-- @param camera table: Camera state.
+-- @param dx number: Horizontal movement.
+-- @param dy number: Vertical movement.
+function rat.camera.move_camera(camera, dx, dy)
+   camera.x = camera.x + dx
+   camera.y = camera.y + dy
+   clamp_camera_to_bounds(camera)
+end
+
+--- Set an absolute camera position.
+-- @param camera table: Camera state.
+-- @param x number: World x coordinate.
+-- @param y number: World y coordinate.
+function rat.camera.set_camera_position(camera, x, y)
+   camera.x = x
+   camera.y = y
+   clamp_camera_to_bounds(camera)
+end
+
+--- Adjust camera zoom by an amount.
+-- @param camera table: Camera state.
+-- @param amount number: Amount to add to zoom.
+function rat.camera.zoom_camera(camera, amount)
+   camera.zoom = camera.zoom + amount
+end
+
+--- Set camera zoom.
+-- @param camera table: Camera state.
+-- @param zoom number: New zoom value.
+function rat.camera.set_camera_zoom(camera, zoom)
+   camera.zoom = zoom
+end
+
+--- Convert world coordinates to camera screen coordinates.
+-- @param camera table: Camera state.
+-- @param x number: World x coordinate.
+-- @param y number: World y coordinate.
+-- @return number, number: Screen x and y coordinates.
+function rat.camera.world_to_screen(camera, x, y)
+   local screen_x = (x - camera.x) * camera.zoom
+   local screen_y = (y - camera.y) * camera.zoom
+
+   return screen_x, screen_y
+end
+
+--- Convert camera screen coordinates to world coordinates.
+-- @param camera table: Camera state.
+-- @param x number: Screen x coordinate.
+-- @param y number: Screen y coordinate.
+-- @return number, number: World x and y coordinates.
+function rat.camera.screen_to_world(camera, x, y)
+   local world_x = x / camera.zoom + camera.x
+   local world_y = y / camera.zoom + camera.y
+
+   return world_x, world_y
+end
+
+--- Set camera position bounds.
+-- @param camera table: Camera state.
+-- @param min_x number: Minimum x.
+-- @param min_y number: Minimum y.
+-- @param max_x number: Maximum x.
+-- @param max_y number: Maximum y.
+function rat.camera.set_camera_bounds(camera, min_x, min_y, max_x, max_y)
+   camera.min_x = min_x
+   camera.min_y = min_y
+   camera.max_x = max_x
+   camera.max_y = max_y
+   clamp_camera_to_bounds(camera)
+end
+
+--- Remove camera position bounds.
+-- @param camera table: Camera state.
+function rat.camera.clear_camera_bounds(camera)
+   camera.min_x = nil
+   camera.min_y = nil
+   camera.max_x = nil
+   camera.max_y = nil
 end
 
 return rat
